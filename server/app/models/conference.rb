@@ -11,18 +11,18 @@ class Conference < ApplicationRecord
     state :inactive, initial: true
     state :active
     state :pending
-  end
 
-  event :start, after: :start_event do
-    transitions from: [:inactive], to: :pending
-  end    
+    event :start, after: :start_event do
+      transitions from: [:inactive], to: :pending
+    end    
+    
+    event :stop do
+      transitions from: [:active], to: :inactive
+    end
   
-  event :stop do
-    transitions from: [:active], to: :inactive
-  end
-
-  event :activate, after: :notify_activation do 
-    transitins from: [:pending], to: :active
+    event :activate, after: :notify_activation do 
+      transitions from: [:pending], to: :active
+    end
   end
 
   private
