@@ -6,4 +6,7 @@ class User < ApplicationRecord
   validates :name, presence: true
   validates :phone, phone: true
 
+  validates :megafone_login
+  validates :megafone_password
+
 end

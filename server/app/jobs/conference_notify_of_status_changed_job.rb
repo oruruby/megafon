@@ -1,7 +1,7 @@
 class ConferenceNotifyOfStatusChangedJob < ApplicationJob
   queue_as :default
 
-  def perform(*args)
-    # Do something later
+  def perform(conference)
+    ActionCable.server.broadcast 'conference_channel', content: conference 
   end
 end
