@@ -16,12 +16,16 @@ class Conference < ApplicationRecord
       transitions from: [:inactive], to: :pending
     end    
     
-    event :stop do
-      transitions from: [:active], to: :inactive
+    event :stop, after: :stop_event do
+      transitions from: [:active], to: :pending
     end
   
-    event :activate, after: :notify_activation do 
+    event :activate, after: :activate_event do 
       transitions from: [:pending], to: :active
+    end
+
+    event :inactivate, after: :incativate_event do 
+      transitions from: [:pending], to: :inactive
     end
   end
 
@@ -29,10 +33,11 @@ class Conference < ApplicationRecord
 
   def start_event
     notify_of_status_changed
-    connect_members
+    start_conference
   end
 
   def stop_event
+    stop_conference
     notify_of_status_changed
   end
 
@@ -40,12 +45,20 @@ class Conference < ApplicationRecord
     notify_of_status_changed
   end
 
-  def notify_of_status_changed
-    ConferenceNotiFyOfStatusChanged.perform_later self
+  def incativate_event
+    notify_of_status_changed
   end
 
-  def connect_members
-    StartConference.perform_later self
+  def notify_of_status_changed
+    ConferenceNotifyOfStatusChangedJob.perform_later self
+  end
+
+  def stop_conference
+    StopConferenceJob.perform_later self
+  end
+
+  def start_conference
+    StartConferenceJob.perform_later self
   end
 
 end

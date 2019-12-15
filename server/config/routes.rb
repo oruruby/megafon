@@ -4,4 +4,8 @@ Rails.application.routes.draw do
 
   resources :conferences
   resources :conference_actions, only: %i{create}
+
+  resources :members, only: %i{ create index }
+
+  post '/megafone', to: 'megafon#callback'
 end

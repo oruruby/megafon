@@ -1,6 +1,6 @@
 class ConferenceChannel < ApplicationCable::Channel
   def subscribed
-    stream_from "conference_channel"
+    stream_from "conference_#{params[:room]}" if true #TODO: Decline if not owned conference
   end
 
   def unsubscribed

@@ -1,32 +1,87 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+    <div class="nav">
+      <h1>
+        <router-link to="/">
+         {{title}} 
+        </router-link>
+         
+        </h1>
+      <router-link class="my-icon-link" to="/account">
+        <i class="fa fa-user" style="color: white;font-size: 25px;"></i>
+      </router-link>
     </div>
     <router-view/>
   </div>
 </template>
 
+<script>
+export default {
+  computed: {
+    title(){
+      return this.$store.getters.title
+    }
+  }
+}
+</script>
+
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+  *{
+    margin: 0;
+    padding: 0;
+  font-family: Roboto;
+  }
+  .router-link-active{
+    text-decoration: none;
+    color: inherit;
+  }
+  a{
+    text-decoration: none;
+    color: inherit;
+  }
+</style>
+
+<style scoped>
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 15px;
+  box-sizing: border-box;
+  height: 50px;
+  width: 100%;
+  background: #00985F;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 }
 
-#nav {
-  padding: 30px;
+h1{
+  font-style: normal;
+  font-weight: 300;
+  font-size: 22px;
+  line-height: 26px;
+  color: #FFFFFF;
+
 }
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
+.my-icon-link{
+  display: flex;
+  height: 100%;
 }
 
-#nav a.router-link-exact-active {
-  color: #42b983;
+.my-icon-link::before{
+  display: inline-block;
+  width: 1px;
+  border-left: 1px solid #fff;
+  opacity: 0.40;
+  height: 100%;
+  content: ""
 }
+
+.my-icon-link i{
+  margin: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 </style>
