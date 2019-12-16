@@ -70,8 +70,12 @@ export default {
       rejected() {
         console.log('rejected')
       },
-      received() {
-        this.$store.dispatch('loadConference', {id: this.$route.params.id})
+      received(data) {
+        if(data.type == 'member'){
+          this.$store.dispatch('updateMemberLocal', {id: data.id, status: data.status})
+        }else if(data.type == 'conference'){
+          this.$store.dispatch('updateConferenceLocal', {id: data.id, status: data.status})
+        }
       },
       disconnected() {
         console.log('disconnected')

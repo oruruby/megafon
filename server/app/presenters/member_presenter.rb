@@ -1,9 +1,9 @@
 class MemberPresenter < BasePresenter
   def name
-    'Name' + phone
+    'Name ' + phone
   end
 
   def status
-    'status'
+    aasm.current_state
   end
 end

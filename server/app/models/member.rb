@@ -1,5 +1,6 @@
 class Member < ApplicationRecord
-
+  include AASM
+  
   belongs_to :user
   belongs_to :conference
 

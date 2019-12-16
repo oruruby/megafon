@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_15_155530) do
+ActiveRecord::Schema.define(version: 2019_12_16_183322) do
 
   create_table "conference_actions", force: :cascade do |t|
     t.integer "status"
@@ -28,11 +28,19 @@ ActiveRecord::Schema.define(version: 2019_12_15_155530) do
     t.string "conf_session"
   end
 
+  create_table "member_actions", force: :cascade do |t|
+    t.integer "name_cd"
+    t.integer "member_id"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
+
   create_table "members", force: :cascade do |t|
     t.integer "user_id"
     t.integer "conference_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "aasm_state"
   end
 
   create_table "users", force: :cascade do |t|

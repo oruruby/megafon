@@ -1,7 +1,7 @@
 class ConferenceAction < ApplicationRecord
 
   belongs_to :conference
-  enum status: [:start, :stop, :activate, :inactivate] 
+  enum status: [:start, :stop, :activate, :inactivate, :check] 
 
   validates :status, inclusion: { in: ConferenceAction.statuses.keys }
 

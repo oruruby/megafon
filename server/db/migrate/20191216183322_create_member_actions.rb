@@ -5,5 +5,6 @@ class CreateMemberActions < ActiveRecord::Migration[6.0]
       t.integer :member_id
       t.timestamps
     end
+    add_column :members, :aasm_state, :string
   end
 end
