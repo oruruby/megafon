@@ -49,6 +49,8 @@ class MegafonController < ApplicationController
         else
           throw 'Unknown data in confStatusGet'
         end
+      else
+        throw "Unknown action #{conference_action}"
       end
     else
       

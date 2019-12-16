@@ -1,5 +1,4 @@
 class SyncConferencesJob < ApplicationJob
-  queue_as :default
 
   def perform
     Conference.where(aasm_state: 'pending').each do |conference|

@@ -1,8 +1,4 @@
-require "uri"
-require "net/http"
-
 class ConferenceCheckJob < ApplicationJob
-  queue_as :default
 
   def perform(conference)
     data = { id: "secretworld_#{conference.id}_confStatusGet", method: 'confStatusGet', params: {

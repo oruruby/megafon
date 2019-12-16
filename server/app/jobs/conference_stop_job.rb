@@ -1,8 +1,4 @@
-require "uri"
-require "net/http"
-
 class ConferenceStopJob < ApplicationJob
-  queue_as :default
 
   def perform(conference)
     data = { id: "secretworld_#{conference.id}_confDestroy", method: 'confDestroy', params: {
