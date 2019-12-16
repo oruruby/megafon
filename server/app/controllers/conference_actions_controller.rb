@@ -1,11 +1,7 @@
 class ConferenceActionsController < ApplicationController
 
   def create
-    @conference_action = ConferenceAction.new(
-      status: ConferenceAction.statuses[params[:name]].to_i,
-      conference: Conference.find(params[:conference_id])
-    )
-     @conference_action.save
+    Conference.find(params[:conference_id]).actions.create(status: params[:name].to_i)
     render json: {status: "success"}
   end
 

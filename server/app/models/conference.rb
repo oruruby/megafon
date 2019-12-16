@@ -3,7 +3,7 @@ class Conference < ApplicationRecord
 
   belongs_to :user
   has_many :members
-
+  has_many :actions, class_name: 'ConferenceAction', foreign_key: 'conference_action_id'
 
   validates :name, presence: true
 

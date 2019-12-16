@@ -6,7 +6,7 @@ class SyncConferencesJob < ApplicationJob
       if conference.conf_session
         CheckConferenceJob.perform_later conference
       else
-        conference.inactivate!
+        conference.actions.create(status: 'inactivate')
       end
     end
   end

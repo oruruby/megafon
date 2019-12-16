@@ -1,21 +1,16 @@
 class ConferenceAction < ApplicationRecord
 
   belongs_to :conference
-  enum status: [:run, :stop] 
+  enum status: [:start, :stop, :activate, :inactivate] 
 
   validates :status, inclusion: { in: ConferenceAction.statuses.keys }
-  
 
   after_save :call_action
 
   private
 
   def call_action
-    if status == "run"
-      conference.start!
-    elsif status == "stop"
-      conference.stop!
-    end
+    conference.send("#{status}!")
   end
 
 end
