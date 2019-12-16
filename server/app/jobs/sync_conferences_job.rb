@@ -4,9 +4,9 @@ class SyncConferencesJob < ApplicationJob
   def perform
     Conference.where(aasm_state: 'pending').each do |conference|
       if conference.conf_session
-        CheckConferenceJob.perform_later conference
+        conference.actions.create(status: :check)
       else
-        conference.actions.create(status: 'inactivate')
+        conference.actions.create(status: :inactivate)
       end
     end
   end

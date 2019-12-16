@@ -3,7 +3,7 @@ class Conference < ApplicationRecord
 
   belongs_to :user
   has_many :members
-  has_many :actions, class_name: 'ConferenceAction', foreign_key: 'conference_action_id'
+  has_many :actions, class_name: 'ConferenceAction'
 
   validates :name, presence: true
 
@@ -11,25 +11,35 @@ class Conference < ApplicationRecord
     state :inactive, initial: true
     state :active
     state :pending
+    state :checking
 
     event :start, after: :start_event do
       transitions from: [:inactive], to: :pending
-    end    
+    end
+
+    event :check, after: :check_event do 
+      transitions from: [:active, :pending], to: :checking
+    end
     
     event :stop, after: :stop_event do
       transitions from: [:active], to: :pending
     end
   
     event :activate, after: :activate_event do 
-      transitions from: [:pending], to: :active
+      transitions from: [:checking, :pending], to: :active
     end
 
     event :inactivate, after: :incativate_event do 
-      transitions from: [:pending], to: :inactive
+      transitions from: [:checking, :pending], to: :inactive
     end
   end
 
   private
+
+  def check_event
+    notify_of_status_changed
+    check_conference
+  end
 
   def start_event
     notify_of_status_changed
@@ -53,12 +63,16 @@ class Conference < ApplicationRecord
     ConferenceNotifyOfStatusChangedJob.perform_later self
   end
 
+  def check_conference
+    ConferenceCheckJob.perform_later self
+  end
+
   def stop_conference
-    StopConferenceJob.perform_later self
+    ConferenceStopJob.perform_later self
   end
 
   def start_conference
-    StartConferenceJob.perform_later self
+    ConferenceStartJob.perform_later self
   end
 
 end

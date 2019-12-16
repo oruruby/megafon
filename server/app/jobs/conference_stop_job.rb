@@ -1,7 +1,7 @@
 require "uri"
 require "net/http"
 
-class StopConferenceJob < ApplicationJob
+class ConferenceStopJob < ApplicationJob
   queue_as :default
 
   def perform(conference)
