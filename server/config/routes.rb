@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   resources :conference_actions, only: %i{create}
 
   resources :members, only: %i{ create index }
+  resources :member_actions, only: %i{create}
 
   post '/megafone', to: 'megafon#callback'
 end

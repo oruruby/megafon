@@ -4,10 +4,11 @@ class ConferencesController < ApplicationController
 
   def index
     @conferences = Conference.all
+    render json: conference_json_index(@conferences)
   end
 
   def show
-
+    render json: conference_json_show(@conference)
   end
 
   def create

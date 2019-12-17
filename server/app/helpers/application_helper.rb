@@ -1,4 +1,7 @@
 module ApplicationHelper
+  
+  include ConferencesHelper
+
   def present(model)
     klass = "#{model.class}Presenter".constantize
     presenter = klass.new(model, self)

@@ -1,12 +1,14 @@
 class Member < ApplicationRecord
   include AASM
-  
+
   belongs_to :user
   belongs_to :conference
 
   has_many :actions, class_name: 'MemberAction'
   
   delegate :phone, to: :user
+
+  after_commit :notify_of_status_changed
 
   validate :inclusion_user_in_conference
 
@@ -17,23 +19,23 @@ class Member < ApplicationRecord
     state :disconnecting
     state :active
 
-    event :call, after: :call_event do 
+    event :call, after_commit: :call_event do 
       transitions from: [:inactive], to: :calling
     end
 
-    event :connect, after: :connect_event do 
-      transitions from: [:inactive], to: :connecting
+    event :connect, after_commit: :connect_event do 
+      transitions from: [:calling], to: :connecting
     end
 
-    event :activate, after: :activate_event do 
-      transitions from: [:inactive], to: :active
+    event :activate do 
+      transitions from: [:connecting], to: :active
     end
 
-    event :inactivate, after: :inactivate_event do 
+    event :inactivate do 
       transitions from: [:active, :disconnecting], to: :inactive
     end
 
-    event :disconnect, after: :disconnect_event do 
+    event :disconnect, after_commit: :disconnect_event do 
       transitions from: [:active], to: :disconnecting
     end
 
@@ -42,38 +44,27 @@ class Member < ApplicationRecord
   private
 
   def call_event
-    notify_of_status_changed
     call_member
   end
 
   def connect_event
-    notify_of_status_changed
     connect_member
   end
 
-  def activate_event
-    notify_of_status_changed
-  end
-
-  def inactivate_event
-    notify_of_status_changed
-  end
-
   def disconnect_event
-    notify_of_status_changed
     disconnect_member
   end
 
   def call_member
-    MemberCallJob.perform_later self
+    MemberCallJob.perform_later self.reload
   end
 
   def connect_member
-    MemberConnectJob.perform_later self
+    MemberConnectJob.perform_later self.reload
   end
 
   def disconnect_member
-    MemberDisconnectJob.perform_later self
+    MemberDisconnectJob.perform_later self.reload
   end
 
   def notify_of_status_changed
@@ -81,7 +72,7 @@ class Member < ApplicationRecord
   end
 
   def inclusion_user_in_conference
-    errors.add(:user, "already in conference") if Member.where(user: user, conference: conference)[0].present?
+    errors.add(:user, "already in conference") if Member.where(user: user, conference: conference).where.not(id: id)[0].present?
   end
 
 end

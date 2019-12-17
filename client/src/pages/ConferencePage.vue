@@ -71,10 +71,12 @@ export default {
         console.log('rejected')
       },
       received(data) {
-        if(data.type == 'member'){
-          this.$store.dispatch('updateMemberLocal', {id: data.id, status: data.status})
-        }else if(data.type == 'conference'){
-          this.$store.dispatch('updateConferenceLocal', {id: data.id, status: data.status})
+        if(data.content.type == 'member'){
+          this.$store.dispatch('updateMemberLocal', {id: data.content.id, status: data.content.status})
+        }else if(data.content.type == 'conference'){
+          this.$store.dispatch('updateConferenceLocal', {status: data.content.status, id: data.content.id})
+        } else {
+          this.$store.dispatch('updateConferenceLocal', data.content)
         }
       },
       disconnected() {

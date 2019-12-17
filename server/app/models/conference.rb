@@ -5,6 +5,8 @@ class Conference < ApplicationRecord
   has_many :members
   has_many :actions, class_name: 'ConferenceAction'
 
+  after_commit :notify_of_status_changed
+
   validates :name, presence: true
 
   aasm do
@@ -25,11 +27,11 @@ class Conference < ApplicationRecord
       transitions from: [:active], to: :pending
     end
   
-    event :activate, after: :activate_event do 
+    event :activate do 
       transitions from: [:checking, :pending], to: :active
     end
 
-    event :inactivate, after: :incativate_event do 
+    event :inactivate do 
       transitions from: [:checking, :pending], to: :inactive
     end
   end
@@ -37,26 +39,15 @@ class Conference < ApplicationRecord
   private
 
   def check_event
-    notify_of_status_changed
     check_conference
   end
 
   def start_event
-    notify_of_status_changed
     start_conference
   end
 
   def stop_event
     stop_conference
-    notify_of_status_changed
-  end
-
-  def activate_event
-    notify_of_status_changed
-  end
-
-  def incativate_event
-    notify_of_status_changed
   end
 
   def notify_of_status_changed

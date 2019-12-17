@@ -1,4 +1,4 @@
-class MemberCallJob < ApplicationJob
+class MemberConnectJob < ApplicationJob
 
   def perform(member)
     data = { id: "secretworld_#{member.id}_confAdd", method: 'confAdd', params: {

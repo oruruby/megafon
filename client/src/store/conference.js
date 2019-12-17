@@ -14,7 +14,7 @@ export default {
     },
     updateMemberLocal(state, {id, status}){
       const members = state.conference.members.map(member => {
-        if(members.id == id){
+        if(member.id == id){
           return {...member, status}
         }else{
           return member
@@ -22,12 +22,12 @@ export default {
       })
       state.conference = {...state.conference, members}
     },
-    updateConferenceLocal(state, {id, status}){
-      if(state.conference.id == id){
-        state.conference = {...state.conference, status}
+    updateConferenceLocal(state, conference){
+      if(state.conference.id == conference.id){
+        state.conference = {...state.conference, ...conference}
       }
-      state.conferences = state.conferences.map(conference => {
-        if( conference.id == id){
+      state.conferences = state.conferences.map(i_conference => {
+        if( i_conference.id == conference.id){
           return {...state.conference, status}
         }else{
           return conference
@@ -36,8 +36,11 @@ export default {
     }
   },
   actions: {
-    updateConferenceLocal({commit}, {id, status}){
-      commit('updateConferenceLocal', {id, status})
+    updateMemberLocal({commit}, {id, status}){
+      commit('updateMemberLocal', {id, status})
+    },
+    updateConferenceLocal({commit}, conference){
+      commit('updateConferenceLocal', conference)
     },
     async loadConferences({commit}){
       const fetch_result = await fetch('http://localhost:3000/conferences')
@@ -53,7 +56,7 @@ export default {
         },
         body: JSON.stringify({
           conference_id: id,
-          name: 'run'
+          name: 'start'
         })
       })
       const data = await fetch_result.json()

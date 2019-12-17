@@ -1,4 +1,5 @@
 class ConferencePresenter < BasePresenter
+
   def message
     'через 2 часа'
   end
