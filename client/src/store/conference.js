@@ -24,7 +24,8 @@ export default {
     },
     createMemberLocal(state, member){
       const members = state.conference.members
-      state.conference = {...state.conference, members: members.push(member)}
+      members.push(member)
+      state.conference = {...state.conference, members}
     },
     deleteMemberLocal(state, member){
       const members = state.conference.members.filter(imember => imember.id != member.id)
@@ -34,13 +35,22 @@ export default {
       if(state.conference.id == conference.id){
         state.conference = {...state.conference, ...conference}
       }
-      state.conferences = state.conferences.map(i_conference => {
-        if( i_conference.id == conference.id){
-          return {...state.conference, status}
-        }else{
+      state.conferences = state.conferences.map(iconference => {
+        if( iconference.id == conference.id){
           return conference
+        }else{
+          return iconference
         }
       })
+    },
+    createConferenceLocal(state, conference){
+      const conferences = state.conferences
+      conferences.push(conference)
+      state.conferences = [...conferences]
+    },
+    deleteConferenceLocal(state, conference){
+      const conferences = state.conferences.filter(iconference => iconference.id != conference.id)
+      state.conferences = [...conferences]
     }
   },
   actions: {
@@ -49,6 +59,12 @@ export default {
     },
     createMemberLocal({commit}, member){
       commit('createMemberLocal', member)
+    },
+    createConferenceLocal({commit}, conference){
+      commit('createConferenceLocal', conference)
+    },
+    deleteConferenceLocal({commit}, conference){
+      commit('deleteConferenceLocal', conference)
     },
     deleteMemberLocal({commit}, member){
       commit('deleteMemberLocal', member)
@@ -102,6 +118,14 @@ export default {
           member_id: id,
           name: 'disconnect'
         })
+      })
+      const data = await fetch_result.json()
+      return data
+    },
+    async deleteConference({commit}, {id}){
+      commit
+      const fetch_result = await fetch('http://localhost:3000/conferences/' + id, {
+        method: 'DELETE',
       })
       const data = await fetch_result.json()
       return data
@@ -164,6 +188,20 @@ export default {
       const data = await fetch_result.json()
       return data
 
+    },
+    async addConference({commit}, {name}){
+      commit
+      const fetch_result = await fetch('http://localhost:3000/conferences/', {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          name
+        })
+      })
+      const data = await fetch_result.json()
+      return data
     }
   },
   getters: {

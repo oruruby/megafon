@@ -4,7 +4,7 @@
       <div class="top-part">
         <h2 class="conference-name">{{ conference.name }}</h2>
         <a href="#">
-          <i class="fa fa-gear" style="color: #AAAAAA; font-size: 20px"></i>
+          <i @click="openControlConferenceModal" class="fa fa-gear control-conference-button" style="color: #AAAAAA; font-size: 20px"></i>
         </a>
       </div>
       <div  class="centred-part">
@@ -30,7 +30,7 @@
           class="member" 
           v-for="member in conference.members" 
           :key="member.id"
-          @click="openControlMemberModal(member)" 
+          @click="openControlMemberModal(member)"
         >
           <i class="fa fa-user" style="color: #aaa; font-size:30px"></i>
           <div class="member-content">
@@ -40,10 +40,20 @@
         </li>
       </ul>
     </div>
-    <modal v-if="showMemberControls">
-      <h3 slot="header" style="font-style: normal; font-weight: normal;">Управление участником</h3>
+        <modal v-if="showConferenceControls">
+      <h3 slot="header" style="font-style: normal; font-weight: normal;">{{ conference.name }}</h3>
       <div slot="body">
-        <h4>{{ controlMember.name }}</h4>
+        <div class="button-group">
+          <a class="button" href="#" @click="deleteConference">Удалить</a>
+        </div>
+      </div>
+      <div slot="footer" style="width: 100%; display: flex; justify-content: space-between">
+        <a class="button" href="#" @click="closeControlMemberModal"> Отменить </a>
+      </div>
+    </modal>
+    <modal v-if="showMemberControls">
+      <h3 slot="header" style="font-style: normal; font-weight: normal;">{{ controlMember.name }}</h3>
+      <div slot="body">
         <div class="button-group">
           <a 
             class="button"
@@ -73,8 +83,8 @@
           <a 
             class="button" 
             href="#" 
-            v-if="(controlMember.mute_status == 'not_in_mute')"
-            @click="unuteMember"
+            v-if="(controlMember.mute_status == 'in_mute')"
+            @click="unmuteMember"
           >
             Разглушить
           </a>
@@ -145,6 +155,7 @@ export default {
     return {
       showModal: false,
       showMemberControls: false,
+      showConferenceControls: false,
       numberField: '',
       controlMember: null,
       errors: {}
@@ -164,9 +175,22 @@ export default {
         room: this.conference.id
       });
     })
-
   },
   methods: {
+    deleteConference(){
+      this.$store.dispatch('deleteConference', {id: this.conference.id})
+      .then(() => {
+        console.log('deleted')
+        this.closeControlConferenceModal()
+        this.$router.push("/")
+      })
+    },
+    openControlConferenceModal(){
+      this.showConferenceControls = true
+    },
+    closeControlConferenceModal(){
+      this.showConferenceControls = false
+    },
     openControlMemberModal(member){
       this.controlMember = {...member}
       this.showMemberControls = true
@@ -228,12 +252,15 @@ export default {
 </script>
 
 <style scoped>
+  .control-conference-button{
+    cursor: pointer;
+  }
   .button-group{
     /* padding-top: 10px;  */
     display: flex; 
     flex-wrap: wrap;
     width: 300px;
-    padding-top: 20px;
+    padding-top: 0px;
     /* justify-content: space-between; */
   }
   .button-group > .button{

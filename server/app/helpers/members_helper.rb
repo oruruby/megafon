@@ -1,4 +1,4 @@
-module ConferencesHelper
+module MembersHelper
 
   def member_json_show member_model
     json = Jbuilder.new

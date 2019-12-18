@@ -1,12 +1,12 @@
-module Conference
-  class StartJob
+module Conferences
+  class StartJob < ApplicationJob
     def perform conference
       Net::HTTP.post(URI.parse('http://localhost:5000'), {
         id: "sectetword_#{conference.id}_confMake",
         method: 'confMake',
-      }.to_json), {
+      }.to_json, {
         'Content-Type' => 'application/json'
-      }
+      })
     end
   end
 end

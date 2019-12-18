@@ -1,16 +1,15 @@
-module Member
-  class ConnectJob
+module Members
+  class UnmuteJob < ApplicationJob
     def perform member
       Net::HTTP.post(URI.parse('http://localhost:5000'), {
-        id: "sectetword_#{member.id}_confAdd",
-        method: 'confAdd',
+        id: "sectetword_#{member.id}_confConfereeUnmute",
+        method: 'confConfereeUnmute',
         params: {
           call_session: member.call_session,
-          conf_session: member.conference.conf_session
         }
-      }.to_json), {
+      }.to_json, {
         'Content-Type' => 'application/json'
-      }
+      })
     end
   end
 end

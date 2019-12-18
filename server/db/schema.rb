@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_17_073033) do
+ActiveRecord::Schema.define(version: 2019_12_18_123918) do
 
   create_table "conference_actions", force: :cascade do |t|
     t.integer "status"
@@ -40,8 +40,9 @@ ActiveRecord::Schema.define(version: 2019_12_17_073033) do
     t.integer "conference_id"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.string "aasm_state"
     t.string "call_session"
+    t.string "loop_state"
+    t.string "mute_state"
   end
 
   create_table "users", force: :cascade do |t|

@@ -5,8 +5,35 @@ class Conference < ApplicationRecord
   has_many :members
   has_many :actions, class_name: 'ConferenceAction'
 
+  validates :name, presence: true, uniqueness: true
+
   after_update do 
-    Conference::NotifyOfUpdatedJob.perform_later self
+    ActionCable.server.broadcast("conference_#{id}", content: {
+      type: :update,
+      data: conference_json_show(self)
+    })
+    ActionCable.server.broadcast("user_#{user.id}", content: {
+      type: :update_conference,
+      data: conference_json_show(self)
+    })
+  end
+
+  after_destroy do
+    ActionCable.server.broadcast("user_#{user.id}", content: {
+      type: :delete_conference,
+      data: conference_json_show(self)
+    })
+  end
+
+  after_create do
+    ActionCable.server.broadcast("conference_#{id}", content: {
+      type: :create,
+      data: conference_json_show(self)
+    })
+    ActionCable.server.broadcast("user_#{user.id}", content: {
+      type: :create_conference,
+      data: conference_json_show(self)
+    })
   end
 
   validates :name, presence: true
@@ -20,26 +47,29 @@ class Conference < ApplicationRecord
     event :start do
       transitions from: [:inactive], to: :pending
       after do
-        Conference::StartJob.perform_later self
+        Conferences::StartJob.perform_later self
       end
     end
 
     event :check do 
       transitions from: [:active, :pending], to: :checking
       after do
-        Conference::CheckJob.perform_later self
+        Conferences::CheckJob.perform_later self
       end
     end
     
     event :stop do
       transitions from: [:active], to: :pending
       after do
-        Conference::StopJob.perform_later self
+        Conferences::StopJob.perform_later self
       end
     end
   
     event :activate do 
       transitions from: [:checking, :pending], to: :active
+      after do
+        members.each(&:call!)
+      end
     end
 
     event :inactivate do 

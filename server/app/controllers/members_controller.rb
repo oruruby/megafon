@@ -1,5 +1,7 @@
 class MembersController < ApplicationController
 
+  before_action :set_member, only: [:destroy]
+
   def create
     @user = User.find_or_create_by(phone: params[:phone])
     if @user.valid?
@@ -15,8 +17,15 @@ class MembersController < ApplicationController
     end
   end
 
-  def index
-    
+  def destroy
+    @member.destroy!
+    render json: {status: 'success'}
+  end
+
+  private
+
+  def set_member
+    @member = Member.find(params[:id])
   end
 
 end

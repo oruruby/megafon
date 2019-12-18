@@ -9,15 +9,24 @@ class Member < ApplicationRecord
   delegate :phone, to: :user
 
   after_update do
-    Member::NotifyOfUpdatedJob.perform_later self
+    ActionCable.server.broadcast("conference_#{conference.id}", content: {
+      type: :update_member,
+      data: member_json_show(self)
+    })
   end
 
   after_destroy do
-    Member::NotifyOfDestroyedJob.perform_later self
+    ActionCable.server.broadcast("conference_#{conference.id}", content: {
+      type: :delete_member,
+      data: member_json_show(self)
+    })
   end
 
   after_create do
-    Member::NotifyOfCreatedJob.perform_later self
+    ActionCable.server.broadcast("conference_#{conference.id}", content: {
+      type: :create_member,
+      data: member_json_show(self)
+    })
   end
 
   validate :inclusion_user_in_conference
@@ -33,14 +42,14 @@ class Member < ApplicationRecord
     event :mute do 
       transitions from: [:not_in_mute], to: :muting
       after do 
-        Member::MuteJob.perform_later self
+        Members::MuteJob.perform_later self
       end
     end
 
     event :unmute do
       transitions from: [:in_mute], to: :unmuting
       after do 
-        Member::UnmuteJob.perform_later self
+        Members::UnmuteJob.perform_later self
       end
     end
 
@@ -72,21 +81,21 @@ class Member < ApplicationRecord
     event :call do 
       transitions from: [:disconnected], to: :calling
       after do 
-        Member::CallJob.perform_later self
+        Members::CallJob.perform_later self
       end
     end
 
     event :connect do
       transitions from: [:in_call], to: :connecting
       after do 
-        Member::ConnectJob.perform_later self
+        Members::ConnectJob.perform_later self
       end
     end
 
     event :disconnect do 
       transitions from: [:in_conf], to: :disconnecting
       after do 
-        Member::DisconnectJon.perform_later self
+        Members::DisconnectJon.perform_later self
       end
     end
 
@@ -120,7 +129,7 @@ class Member < ApplicationRecord
     event :failure_connecting do 
       transitions from: [:connecting], to: :disconnecting
       after do 
-        Member::TerminateCallJob.perform_later self
+        Members::TerminateCallJob.perform_later self
       end
     end
 

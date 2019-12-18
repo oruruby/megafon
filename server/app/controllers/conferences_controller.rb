@@ -1,14 +1,14 @@
 class ConferencesController < ApplicationController
 
-  before_action :set_conference, only: [:update, :show, :delete]
+  before_action :set_conference, only: [:update, :show, :destroy]
 
   def index
     @conferences = Conference.all
-    render json: conference_json_index(@conferences)
+    render json: helpers.conference_json_index(@conferences)
   end
 
   def show
-    render json: conference_json_show(@conference)
+    render json: helpers.conference_json_show(@conference)
   end
 
   def create
@@ -16,11 +16,10 @@ class ConferencesController < ApplicationController
       name: params[:name],
       user: current_user
     )
-
     if @conference.save
-      #
+      render json: {status: :success}
     else
-      #
+      render json:{ errors: @conference.errors }
     end
 
   end
@@ -33,12 +32,9 @@ class ConferencesController < ApplicationController
     end
   end
 
-  def delete
-    if @conference.destroy
-      #
-    else
-      #
-    end
+  def destroy
+    @conference.destroy
+    render json: {status: :success}
   end
 
   private
