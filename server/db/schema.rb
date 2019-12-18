@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_12_18_123918) do
+ActiveRecord::Schema.define(version: 2019_12_18_200851) do
 
   create_table "conference_actions", force: :cascade do |t|
     t.integer "status"
@@ -53,6 +53,8 @@ ActiveRecord::Schema.define(version: 2019_12_18_123918) do
     t.string "name"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.string "connection_state"
+    t.datetime "next_disconnect_date"
   end
 
 end
