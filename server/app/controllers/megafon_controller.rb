@@ -15,8 +15,9 @@ class MegafonController < ApplicationController
         if data["result"]
           if data["result"]["data"]
             if data["result"]["data"]["conf_session"]
-              conference.conf_session = data["result"]["data"]["conf_session"]
-              conference.actions.create(status: :activate)
+              conference.activate! do
+                conference.conf_session = data["result"]["data"]["conf_session"]
+              end
             else
               throw 'data["result"]["data"]["conf_session"] is nil'
             end
@@ -28,8 +29,9 @@ class MegafonController < ApplicationController
         end
       elsif conference_action == 'confDestroy'
         if data["result"]
-          conference.conf_session = nil
-          conference.actions.create(status: :inactivate)
+          conference.inactivate! do 
+            conference.conf_session = nil
+          end
         else
           throw 'Unknown data in confDestroy'
         end
@@ -38,11 +40,13 @@ class MegafonController < ApplicationController
           throw 'Not released action in confStatusGet result'
         elsif data["error"]
           if data["error"]["code"] == -5
-            conference.conf_session = nil
-            conference.actions.create(status: :inactivate)
+            conference.inactivate! do 
+              conference.conf_session = nil
+            end
           elsif data["error"]["code"] == -3
-            conference.conf_session = nil
-            conference.actions.create(status: :inactivate)
+            conference.inactivate! do
+              conference.conf_session = nil
+            end
           else
             throw 'Unknown code in error confStatusGet'
           end

@@ -2,6 +2,9 @@ require "uri"
 require "net/http"
 
 class ApplicationJob < ActiveJob::Base
+
+  include ApplicationHelper
+
   queue_as :default
 
   def present(model)

@@ -1,0 +1,22 @@
+<div style="background-color: #993333; padding-top: 10px; padding-bottom: 10px;">
+  <div id="timer" style="display: flex; justify-content: center; color: white; font-size: 26px;">
+  <div id="days" style="color: black; background-color: #003300; border-radius: 2px; padding: 5px;">&nbsp;</div>
+  <div style="border-radius: 2px; padding: 5px;">&nbsp;days left</div>
+  </div>
+  <div style="display: flex; justify-content: center; color: white; font-size: 18px; padding: 5px;">
+  <div style="display: flex; justify-content: center; color: white; font-size: 18px; padding: 5px;">X-MAS offer! You can buy our products with</div>
+  <div style="background-color: #003300; color: white; padding: 5px; border-radius: 2px;"><strong>40%</strong></div>
+  <div style="display: flex; justify-content: center; color: white; font-size: 18px; padding: 5px;">discount</div>
+  </div>
+  </div>
+  <div>&nbsp;</div>
+  <script type="text/javascript">
+    end = {year: 2020, month: 1, day: 8, hour: 0, minute: 0, second: 0}
+    ids = {timer: 'timer', days: 'days'}
+    ///////////////////////////////////////////////////////////////////////
+    t=new Date(end.year,end.month-1,end.day,end.hour,end.minute,end.second);function time(){d=new Date();
+    if(t < d){document.getElementById(ids.timer).style.display = 'none'}d=Math.floor((t-d)/1000);s=d%60;
+    d=Math.floor(d/60);if(s<10)s='0'+s;m=d%60;d=Math.floor(d/60);if(m<10)m='0'+m;h=d%24;d=Math.floor(d/24);
+    calc={days: d, hours: h, minutes: m, seconds: s}; for(let dim of Object.keys(ids).splice(1, 4)){
+    document.getElementById(ids[dim]).innerHTML=calc[dim];}}time();
+  </script>

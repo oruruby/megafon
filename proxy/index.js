@@ -5,7 +5,6 @@ const app = express();
 const WebSocketClient = require('websocket').client;
 const client = new WebSocketClient();
 const fetch = require("node-fetch");
-let counter = 0
 app.use(bodyParser.json())
 client.on('connectFailed', function(error) {
   console.log('Connect Error: ' + error.toString());

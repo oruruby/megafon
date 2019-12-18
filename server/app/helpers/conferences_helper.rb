@@ -27,6 +27,7 @@ module ConferencesHelper
             json.id member.id
             json.name member.name
             json.status member.status
+            json.mute_status member.mute_status
           end
         end
       end

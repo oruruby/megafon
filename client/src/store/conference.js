@@ -12,14 +12,22 @@ export default {
     setConference(state, payload){
       state.conference = payload
     },
-    updateMemberLocal(state, {id, status}){
-      const members = state.conference.members.map(member => {
-        if(member.id == id){
-          return {...member, status}
+    updateMemberLocal(state, member){
+      const members = state.conference.members.map(imember => {
+        if(imember.id == member.id){
+          return {...imember, ...member}
         }else{
-          return member
+          return imember
         }
       })
+      state.conference = {...state.conference, members}
+    },
+    createMemberLocal(state, member){
+      const members = state.conference.members
+      state.conference = {...state.conference, members: members.push(member)}
+    },
+    deleteMemberLocal(state, member){
+      const members = state.conference.members.filter(imember => imember.id != member.id)
       state.conference = {...state.conference, members}
     },
     updateConferenceLocal(state, conference){
@@ -36,8 +44,14 @@ export default {
     }
   },
   actions: {
-    updateMemberLocal({commit}, {id, status}){
-      commit('updateMemberLocal', {id, status})
+    updateMemberLocal({commit}, member){
+      commit('updateMemberLocal', member)
+    },
+    createMemberLocal({commit}, member){
+      commit('createMemberLocal', member)
+    },
+    deleteMemberLocal({commit}, member){
+      commit('deleteMemberLocal', member)
     },
     updateConferenceLocal({commit}, conference){
       commit('updateConferenceLocal', conference)
@@ -46,6 +60,59 @@ export default {
       const fetch_result = await fetch('http://localhost:3000/conferences')
       const data = await fetch_result.json()
       commit('setConferences', data)
+    },
+    async muteMember({commit}, {id}){
+      commit
+      const fetch_result = await fetch('http://localhost:3000/member_actions', {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          member_id: id,
+          name: 'mute'
+        })
+      })
+      const data = await fetch_result.json()
+      return data
+    },
+    async unmuteMember({commit}, {id}){
+      commit
+      const fetch_result = await fetch('http://localhost:3000/member_actions', {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          member_id: id,
+          name: 'unmute'
+        })
+      })
+      const data = await fetch_result.json()
+      return data
+    },
+    async disconnectMember({commit}, {id}){
+      commit
+      const fetch_result = await fetch('http://localhost:3000/member_actions', {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          member_id: id,
+          name: 'disconnect'
+        })
+      })
+      const data = await fetch_result.json()
+      return data
+    },
+    async deleteMember({commit}, {id}){
+      commit
+      const fetch_result = await fetch('http://localhost:3000/members/' + id, {
+        method: 'DELETE',
+      })
+      const data = await fetch_result.json()
+      return data
     },
     async startConference({commit}, {id}){
       commit

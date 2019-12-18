@@ -1,7 +1,7 @@
 class MemberAction < ApplicationRecord
 
   belongs_to :member
-  enum status: [:call, :connect, :activate, :inactivate, :disconnect] 
+  enum status: [:call, :mute, :unmute, :disconnect, :terminate] 
 
   validates :status, inclusion: { in: MemberAction.statuses.keys }
 

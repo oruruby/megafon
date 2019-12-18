@@ -5,7 +5,7 @@ class MembersController < ApplicationController
     if @user.valid?
       @member = Member.new(user: @user, conference: Conference.find(params[:conference_id]) )
       if @member.save
-        ActionCable.server.broadcast "conference_#{@member.conference_id}", content: conference_json_show(@member.conference) 
+        # ActionCable.server.broadcast "conference_#{@member.conference_id}", content: conference_json_show(@member.conference) 
         render json: {status: 'success'}
       else
         render json:{ errors: @member.errors }

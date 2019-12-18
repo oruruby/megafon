@@ -26,7 +26,12 @@
     </div>
     <div>
       <ul>
-        <li class="member" v-for="member in conference.members" :key="member.id">
+        <li 
+          class="member" 
+          v-for="member in conference.members" 
+          :key="member.id"
+          @click="openControlMemberModal(member)" 
+        >
           <i class="fa fa-user" style="color: #aaa; font-size:30px"></i>
           <div class="member-content">
             <h3 class="member-name"> {{ member.name }} </h3>
@@ -35,7 +40,51 @@
         </li>
       </ul>
     </div>
-    <modal v-if="showModal" @close="showModal = false">
+    <modal v-if="showMemberControls">
+      <h3 slot="header" style="font-style: normal; font-weight: normal;">Управление участником</h3>
+      <div slot="body">
+        <h4>{{ controlMember.name }}</h4>
+        <div class="button-group">
+          <a 
+            class="button"
+            href="#" 
+            v-if="(controlMember.status == 'inactive') && (conference.status == 'active')" 
+            @click="callMember"
+          >
+            Позвонить
+          </a>
+          <a 
+            class="button" 
+            href="#" 
+            v-if="(controlMember.status == 'active')"
+            @click="disconnectMember"
+          >
+            Отключить
+          </a>
+          <a class="button" href="#" @click="deleteMember">Удалить</a>
+          <a 
+            class="button" 
+            href="#" 
+            v-if="(controlMember.mute_status == 'not_in_mute')"
+            @click="muteMember"
+          >
+            Заглушить
+          </a>
+          <a 
+            class="button" 
+            href="#" 
+            v-if="(controlMember.mute_status == 'not_in_mute')"
+            @click="unuteMember"
+          >
+            Разглушить
+          </a>
+        </div>
+      </div>
+      <div slot="footer" style="width: 100%; display: flex; justify-content: space-between">
+        <a class="button" href="#" @click="closeControlMemberModal"> Отменить </a>
+      </div>
+    </modal>
+    <modal v-show="showModal" @close="showModal = false">
       <h3 slot="header" style="font-style: normal; font-weight: normal;">Добавить участника</h3>
       <div slot="body">
         <input v-model="numberField" type="text" class="my-custom-input">
@@ -70,14 +119,22 @@ export default {
       rejected() {
         console.log('rejected')
       },
-      received(data) {
-        if(data.content.type == 'member'){
-          this.$store.dispatch('updateMemberLocal', {id: data.content.id, status: data.content.status})
-        }else if(data.content.type == 'conference'){
-          this.$store.dispatch('updateConferenceLocal', {status: data.content.status, id: data.content.id})
-        } else {
-          this.$store.dispatch('updateConferenceLocal', data.content)
+      received(result) {
+        const actions = {
+          update: conference => {
+            this.$store.dispatch('updateConferenceLocal', conference)
+          },
+          update_member: member => {
+            this.$store.dispatch('updateMemberLocal', member)
+          },
+          delete_member: member => {
+            this.$store.dispatch('deleteMemberLocal', member)
+          },
+          create_member: member => {
+            this.$store.dispatch('createMemberLocal', member)
+          }
         }
+        actions[result.content.type](result.content.data)
       },
       disconnected() {
         console.log('disconnected')
@@ -87,7 +144,9 @@ export default {
   data: () => {
     return {
       showModal: false,
+      showMemberControls: false,
       numberField: '',
+      controlMember: null,
       errors: {}
     }
   },
@@ -108,11 +167,38 @@ export default {
 
   },
   methods: {
+    openControlMemberModal(member){
+      this.controlMember = {...member}
+      this.showMemberControls = true
+    },
+    unControlMember(){
+      this.showMemberControls = false
+      this.controlMember = null
+    },
+    closeControlMemberModal(){
+      this.unControlMember()
+    },
     startConference(){
       this.$store.dispatch('startConference', { id: this.conference.id })
     },
     stopConference(){
       this.$store.dispatch('stopConference', { id: this.conference.id })
+    },
+    muteMember(){
+      this.$store.dispatch('muteMember', {id: this.controlMember.id })
+      .then(() => this.unControlMember())
+    },
+    unmuteMember(){
+      this.$store.dispatch('unmuteMember', {id: this.controlMember.id })
+      .then(() => this.unControlMember())
+    },
+    disconnectMember(){
+      this.$store.dispatch('disconnectMember', {id: this.controlMember.id })
+      .then(() => this.unControlMember())
+    },
+    deleteMember(){
+      this.$store.dispatch('deleteMember', {id: this.controlMember.id })
+      .then(() => this.unControlMember())
     },
     close(){
       this.errors = {}
@@ -142,12 +228,26 @@ export default {
 </script>
 
 <style scoped>
-a.disabled {
-  pointer-events: none;
-  cursor: default;
-  opacity: 0.3;
-}
+  .button-group{
+    /* padding-top: 10px;  */
+    display: flex; 
+    flex-wrap: wrap;
+    width: 300px;
+    padding-top: 20px;
+    /* justify-content: space-between; */
+  }
+  .button-group > .button{
+    margin-top: 3px;
+    margin-bottom: 2px;
+    margin-right: 5px;
+  }
+  a.disabled {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.3;
+  }
   .member{
+    cursor: pointer;
     display: flex;
     padding-left: 15px;
     padding-right: 15px;

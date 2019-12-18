@@ -4,6 +4,10 @@ class MemberPresenter < BasePresenter
   end
 
   def status
-    aasm.current_state
+    aasm.loop_state
+  end
+
+  def mute_status
+    aasm.mute_state
   end
 end

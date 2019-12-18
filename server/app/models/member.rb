@@ -8,68 +8,135 @@ class Member < ApplicationRecord
   
   delegate :phone, to: :user
 
-  after_commit :notify_of_status_changed
+  after_update do
+    Member::NotifyOfUpdatedJob.perform_later self
+  end
+
+  after_destroy do
+    Member::NotifyOfDestroyedJob.perform_later self
+  end
+
+  after_create do
+    Member::NotifyOfCreatedJob.perform_later self
+  end
 
   validate :inclusion_user_in_conference
 
-  aasm do
-    state :inactive, initial: true
-    state :calling
-    state :connecting
-    state :disconnecting
-    state :active
+  aasm(:mute, column: 'mute_state') do 
+    state :not_in_mute, initial: true
+    state :muting
+    state :in_mute
+    state :unmuting
 
-    event :call, after_commit: :call_event do 
-      transitions from: [:inactive], to: :calling
+    #
+
+    event :mute do 
+      transitions from: [:not_in_mute], to: :muting
+      after do 
+        Member::MuteJob.perform_later self
+      end
     end
 
-    event :connect, after_commit: :connect_event do 
-      transitions from: [:calling], to: :connecting
+    event :unmute do
+      transitions from: [:in_mute], to: :unmuting
+      after do 
+        Member::UnmuteJob.perform_later self
+      end
     end
 
-    event :activate do 
-      transitions from: [:connecting], to: :active
+    #
+
+    event :success_muting do
+      transitions from: [:muting], to: :in_mute
     end
 
-    event :inactivate do 
-      transitions from: [:active, :disconnecting], to: :inactive
+    event :success_unmuting do 
+      transitions from: [:unmuting], to: :not_in_mute
     end
 
-    event :disconnect, after_commit: :disconnect_event do 
-      transitions from: [:active], to: :disconnecting
+    #
+
+    event :failure_muting do 
+      transitions from: [:muting], to: :not_in_mute
     end
+
+    event :failure_unmuting do 
+      transitions from: [:unmuting], to: :in_mute
+    end
+  end
+
+  aasm(:loop, column: 'loop_state') do
+    state :disconnected, initial: true
+    state :calling, :in_call, :connecting, :in_conf, :disconnecting
+
+    event :call do 
+      transitions from: [:disconnected], to: :calling
+      after do 
+        Member::CallJob.perform_later self
+      end
+    end
+
+    event :connect do
+      transitions from: [:in_call], to: :connecting
+      after do 
+        Member::ConnectJob.perform_later self
+      end
+    end
+
+    event :disconnect do 
+      transitions from: [:in_conf], to: :disconnecting
+      after do 
+        Member::DisconnectJon.perform_later self
+      end
+    end
+
+    #
+
+    event :success_calling do 
+      transitions from: [:calling], to: :in_call
+
+      after do
+        connect!
+      end
+    end
+
+    event :success_connecting do 
+      transitions from: [:connecting], to: :in_conf
+    end
+
+    event :success_disconnecting do 
+      transitions from: [:disconnecting], to: :disconnected
+      after do
+        call_session = nil
+      end
+    end
+
+    #
+
+    event :failure_calling do 
+      transitions from: [:calling], to: :disconnected
+    end
+
+    event :failure_connecting do 
+      transitions from: [:connecting], to: :disconnecting
+      after do 
+        Member::TerminateCallJob.perform_later self
+      end
+    end
+
+    #
+
+    event :reject_call do 
+      transitions from: [:calling, :in_call, :connecting, :in_conf, :disconnecting], to: :disconnected
+      after do 
+        call_session = nil
+      end
+    end 
+    
 
   end
 
   private
-
-  def call_event
-    call_member
-  end
-
-  def connect_event
-    connect_member
-  end
-
-  def disconnect_event
-    disconnect_member
-  end
-
-  def call_member
-    MemberCallJob.perform_later self.reload
-  end
-
-  def connect_member
-    MemberConnectJob.perform_later self.reload
-  end
-
-  def disconnect_member
-    MemberDisconnectJob.perform_later self.reload
-  end
-
-  def notify_of_status_changed
-    MemberNotifyOfStatusChangedJob.perform_later self
-  end
 
   def inclusion_user_in_conference
     errors.add(:user, "already in conference") if Member.where(user: user, conference: conference).where.not(id: id)[0].present?
